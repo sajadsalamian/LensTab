@@ -96,7 +96,7 @@ export default function Profile() {
     //     });
     //     const signature = await ethereum.request({
     //       method: "personal_sign",
-    //       params: ["Welcome to NITRO W3!", accounts[0]],
+    //       params: ["Welcome to Lens Tab!", accounts[0]],
     //     });
     //     console.log(signature);
     //     let postData = { user_id: user.user_id, sign: signature };
