@@ -418,9 +418,9 @@ export default function Profile() {
         </div>
         <div>
           <div className="flex justify-center">
-            {/* <ConnectKitButton /> */}
+            <ConnectKitButton />
 
-            <ConnectKitButton.Custom>
+            {/* <ConnectKitButton.Custom>
               {({
                 isConnected,
                 isConnecting,
@@ -441,7 +441,7 @@ export default function Profile() {
                   />
                 );
               }}
-            </ConnectKitButton.Custom>
+            </ConnectKitButton.Custom> */}
           </div>
         </div>
       </div>
