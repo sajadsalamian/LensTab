@@ -39,8 +39,8 @@ function Input({
   };
 
   return (
-    <div className={twMerge("mb-5", parentClass)} onBlur={onBlur}>
-      <Label label={label} required={required} />
+    <div className={twMerge("", parentClass)} onBlur={onBlur}>
+      <Label label={label} required={required} className={labelClass} />
       <div className="relative">
         <input
           type={type}

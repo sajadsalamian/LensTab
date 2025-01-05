@@ -5,32 +5,61 @@ import { Toast } from "../../components/Layouts/Main/Helper";
 import Input from "../../components/Elements/Input";
 import { RotatingLines } from "react-loader-spinner";
 import axios from "axios";
-import { Icon } from "@iconify/react/dist/iconify.js";
 import ticketBg from "../../assets/images/ticket.png";
+import profileBottom from "../../assets/images/profile-bottom.png";
+import { ConnectKitButton } from "connectkit";
+import {
+  useAccount,
+  useSendTransaction,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { signMessage, switchChain } from "@wagmi/core";
+import { config } from "../../main";
+import { zksyncSepoliaTestnet } from "wagmi/chains";
+import { parseEther } from "viem";
+import Label from "../../components/Elements/Label";
+import { Icon } from "@iconify/react/dist/iconify.js";
 
 export default function Profile() {
-  const [user, setUser]: any = useState({});
-  const [account, setAccount] = useState("");
-  const [loadUser, setLoadUser] = useState(false);
-  const [isConnect, setIsConnect] = useState(false);
+  const account = useAccount();
 
-  const [tokenCount, setTokenCount] = useState(0);
-  const [loadingBuy, setLoadingBuy] = useState(false); // duplicate variable
+  const {
+    data: hash,
+    error,
+    isPending,
+    writeContractAsync,
+  } = useWriteContract({ config });
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
+
+  const [user, setUser]: any = useState({});
+  const [loadUser, setLoadUser] = useState(false);
+
+  const [tokenCount, setTokenCount] = useState(1);
 
   useEffect(() => {
-    // console.log("is uyux metamask?", ethereum.isMetaMask);
-    // if (ethereum.isConnected()) {
-    //   setAccount(ethereum.selectedAddress);
-    // }
     FetchUser();
   }, []);
 
   useEffect(() => {
-    console.log("user load");
     if (user.user_id != null) {
       setLoadUser(true);
+      console.log(user);
+      if (account.status === "connected") {
+        ConnectWallet();
+      }
     }
   }, [user]);
+
+  useEffect(() => {
+    if (account.status === "connected") {
+      ConnectWallet();
+    } else if (account.status === "disconnected") {
+      DisconnectWallet();
+    }
+  }, [account.status]);
 
   const FetchUser = () => {
     let userInfo1 = JSON.parse(localStorage.getItem("user"));
@@ -44,125 +73,138 @@ export default function Profile() {
       data: postData,
     })
       .then((res) => {
-        console.log("Axios user fetch res", res);
         setUser(res.data);
         localStorage.setItem("user", JSON.stringify(res.data));
       })
       .catch((err) => {
-        console.log("Fetch user Data Error:", err);
         if (err.response) {
           console.log("Fetch user Data Error Response:", err.response);
         }
       });
   };
 
-  // const { ethereum } = new WalletTgSdk({
-  //   injected: true, // default: false
-  // });
-
-  const ConnectToWallet = async () => {
-    //   window.ethereum;
-    //   const accounts = await ethereum.request({
-    //     method: "eth_requestAccounts",
-    //   });
-    //   setAccount(accounts[0]);
-    //   SignWallet();
-    //   let postData = { user_id: user.user_id, wallet_address: accounts[0] };
-    //   axios
-    //     .post(import.meta.env.VITE_API_URL + "/submit_wallet", postData)
-    //     .then((res) => {
-    //       console.log(res.data[0]);
-    //       if (!res.data[0].error) {
-    //         setUser({ ...user, wallet_address: accounts[0] });
-    //         localStorage.setItem(
-    //           "user",
-    //           JSON.stringify({ ...user, wallet_address: accounts[0] })
-    //         );
-    //       } else {
-    //         Toast("e", res.data[0].message);
-    //       }
-    //     })
-    //     .catch((err) => {
-    //       console.log("Fetch user Data Error:", err);
-    //     });
+  const ConnectWallet = async () => {
+    if (
+      account.status === "connected" &&
+      loadUser &&
+      (user.wallet_address == null || user.wallet_address.length < 5)
+    ) {
+      console.log("connect wallet");
+      let postData = { user_id: user.user_id, wallet_address: account.address };
+      axios
+        .post(import.meta.env.VITE_API_URL + "/submit_wallet", postData)
+        .then((res) => {
+          console.log(res.data[0]);
+          if (!res.data[0].error) {
+            setUser({ ...user, wallet_address: account.address });
+            localStorage.setItem(
+              "user",
+              JSON.stringify({ ...user, wallet_address: account.address })
+            );
+          } else {
+            Toast("e", res.data[0].message);
+          }
+        })
+        .catch((err) => {
+          console.log("Fetch user Data Error:", err);
+        });
+    } else {
+      console.log("not new connect wallet");
+    }
   };
 
   const SignWallet = async () => {
-    //   const accounts = await ethereum.request({ method: "eth_accounts" });
-    //   try {
-    //     await ethereum.request({
-    //       method: "wallet_switchEthereumChain",
-    //       params: [{ chainId: "0xcc" }],
-    //     });
-    //     const signature = await ethereum.request({
-    //       method: "personal_sign",
-    //       params: ["Welcome to Lens Tab!", accounts[0]],
-    //     });
-    //     console.log(signature);
-    //     let postData = { user_id: user.user_id, sign: signature };
-    //     axios
-    //       .post(import.meta.env.VITE_API_URL + "/submit_sign", postData)
-    //       .then((res) => {
-    //         console.log(res.data[0]);
-    //         if (!res.data[0].error) {
-    //           setUser({ ...user, sign: signature });
-    //           localStorage.setItem(
-    //             "user",
-    //             JSON.stringify({ ...user, sign: signature })
-    //           );
-    //         } else {
-    //           Toast("e", res.data[0].message);
-    //         }
-    //       })
-    //       .catch((err) => {
-    //         console.log("Fetch user Data Error:", err);
-    //       });
-    //   } catch (error: any) {
-    //     console.log("Failed to send transaction:", error);
-    //     let message = "error on Sign";
-    //     switch (error.code) {
-    //       case 4001:
-    //         message = "Sign canceled by user.";
-    //         break;
-    //     }
-    //     Toast("error", message);
-    //   }
+    const chainId = account.chainId;
+    if (chainId != Number(import.meta.env.VITE_CHAIN_ID)) {
+      console.log("switchChain start");
+      switchChain(config, { chainId: Number(import.meta.env.VITE_CHAIN_ID) });
+    }
+
+    if (user.sign != null && user.sign.length > 10) {
+      return;
+    }
+    try {
+      const signature = await signMessage(config, {
+        message: "Hello From Lens Tab!",
+      });
+      console.log("sign result", signature);
+
+      let postData = { user_id: user.user_id, sign: signature };
+      axios
+        .post(import.meta.env.VITE_API_URL + "/submit_sign", postData)
+        .then((res) => {
+          console.log(res.data[0]);
+          if (!res.data[0].error) {
+            setUser({ ...user, sign: signature });
+            localStorage.setItem(
+              "user",
+              JSON.stringify({ ...user, sign: signature })
+            );
+          } else {
+            Toast("e", res.data[0].message);
+          }
+        })
+        .catch((err) => {
+          console.log("Fetch user Data Error:", err);
+        });
+    } catch (error: any) {
+      console.log("Failed to send transaction:", error);
+      let message = "error on Sign";
+      switch (error.code) {
+        case 4001:
+          message = "Sign canceled by user.";
+          break;
+      }
+      Toast("error", message);
+    }
   };
 
   const DisconnectWallet = () => {
-    // ethereum.disconnect();
-    // let postData = { user_id: user.user_id, wallet_address: "" };
-    // axios
-    //   .post(import.meta.env.VITE_API_URL + "/submit_wallet", postData)
-    //   .then((res) => {
-    //     console.log(res.data[0]);
-    //     if (!res.data[0].error) {
-    //       setUser({ ...user, wallet_address: "" });
-    //       localStorage.setItem("user", JSON.stringify(user));
-    //     } else {
-    //       Toast("e", res.data[0].message);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log("Fetch user Data Error:", err);
-    //   });
-    // let postData1 = { user_id: user.user_id, sign: "" };
-    // axios
-    //   .post(import.meta.env.VITE_API_URL + "/submit_sign", postData1)
-    //   .then((res) => {
-    //     console.log(res.data[0]);
-    //     if (!res.data[0].error) {
-    //       setUser({ ...user, sign: null });
-    //       localStorage.setItem("user", JSON.stringify({ ...user, sign: null }));
-    //     } else {
-    //       Toast("e", res.data[0].message);
-    //     }
-    //   })
-    //   .catch((err) => {
-    //     console.log("Fetch user Data Error:", err);
-    //   });
-    // console.log("wallet Dc");
-    // console.log(ethereum.isConnected());
+    if (
+      account.status === "disconnected" &&
+      user.wallet_address != null &&
+      user.wallet_address.length > 5
+    ) {
+      console.log("disconnect wallet");
+      let postData = { user_id: user.user_id, wallet_address: "" };
+      axios
+        .post(import.meta.env.VITE_API_URL + "/submit_wallet", postData)
+        .then((res) => {
+          console.log(res.data[0]);
+          if (!res.data[0].error) {
+            setUser({ ...user, wallet_address: "" });
+            localStorage.setItem(
+              "user",
+              JSON.stringify({ ...user, wallet_address: "" })
+            );
+          } else {
+            Toast("e", res.data[0].message);
+          }
+        })
+        .catch((err) => {
+          console.log("Fetch user Data Error:", err);
+        });
+      let postData1 = { user_id: user.user_id, sign: "" };
+      axios
+        .post(import.meta.env.VITE_API_URL + "/submit_sign", postData1)
+        .then((res) => {
+          console.log(res.data[0]);
+          if (!res.data[0].error) {
+            setUser({ ...user, sign: null });
+            localStorage.setItem(
+              "user",
+              JSON.stringify({ ...user, sign: null })
+            );
+          } else {
+            Toast("e", res.data[0].message);
+          }
+        })
+        .catch((err) => {
+          console.log("Fetch user Data Error:", err);
+        });
+    } else {
+      console.log("not new disconnect wallet");
+    }
   };
 
   const BuyToken = async () => {
@@ -175,33 +217,59 @@ export default function Profile() {
       return;
     }
     try {
-      // await ethereum.request({
-      //   method: "wallet_switchEthereumChain",
-      //   params: [{ chainId: "0xcc" }],
-      // });
+      const chainChange = await switchChain(config, {
+        chainId: zksyncSepoliaTestnet.id,
+      });
+      console.log("chainChange", chainChange);
 
-      // const accounts = await ethereum.request({ method: "eth_accounts" });
+      const abi = [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "buyGameToken",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "deployer",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ];
 
-      // const transactionParameters = {
-      //   chainId: "0xcc",
-      //   to: "0x2862F52E80A1dD47e479A303caB4E2b9eF201aE8",
-      //   from: accounts[0],
-      //   value: tokenCount * (0.0001 * 10 ** 18),
-      //   data: "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675"
+      // lenz : 0x7D2E00dDFA500a2A4b4DD5f75cC65B2ff7D29255
+      // zksync : 0x67A4058Bf46d5b51232ff5aa45dc93Ea6445a51E
+      // adccount 2 : 0xaa8A194030c92f3cBbbB9A13C7ca1466ED0b573D
+
+      const txHash = await writeContractAsync({
+        address: "0x67A4058Bf46d5b51232ff5aa45dc93Ea6445a51E",
+        abi,
+        chainId: zksyncSepoliaTestnet.id,
+        functionName: "buyGameToken",
+        value: parseEther("" + tokenCount * 0.0001),
+      });
+
+      console.log("send result", txHash);
+
+      Toast("s", "Token Added.");
+      // let postData = {
+      //   user_id: user.user_id,
+      //   token_amount: Number(tokenCount),
+      //   // hash: txHash,
       // };
-
-      setLoadingBuy(true);
-      // const txHash = await ethereum.request({
-      //   method: "eth_sendTransaction",
-      //   params: [transactionParameters],
-      // });
-      // console.log("Transaction sent:", txHash);
-
-      let postData = {
-        user_id: user.user_id,
-        token_amount: Number(tokenCount),
-        // hash: txHash,
-      };
       // axios
       //   .post(import.meta.env.VITE_API_URL + "/buy_token", postData)
       //   .then((res) => {
@@ -215,127 +283,167 @@ export default function Profile() {
       //     console.log("Fetch user Data Error:", err);
       //   });
       // setLoadingBuy(false);
-      Toast("success", "Tokens Added to Your Profile.");
-      FetchUser();
+      // Toast("success", "Tokens Added to Your Profile.");
+      // FetchUser();
     } catch (error: any) {
-      console.log("Failed to send transaction:", error);
+      console.log("Failed to send transaction:", error.message);
+      console.log(error.message.split(".")[0]);
       let message = "error on transaction";
-      switch (error.code) {
-        case 4001:
-          message = "Transaction canceled by user.";
+      switch (error.message.split(".")[0]) {
+        case "User rejected the request":
+          message = "Transaction canceled.";
           break;
       }
-      setLoadingBuy(false);
       Toast("error", message);
     }
+  };
+
+  const ConnectButtonClick = (show, hide) => {
+    return () => {
+      show();
+    };
   };
 
   return (
     <Main title="Profile">
       <HeadMeta title="Profile" />
       <div className="mb-5 pt-5">
-        <div className="text-center flex flex-col items-center mt-10">
-          <div className="h-20 w-36 bg-primary rounded-tl-full rounded-tr-full mb-2 flex justify-center items-center">
-            <Icon icon="icon-park-outline:game-ps" width="32" height="32" />
-          </div>
-          <div className="mb-2 bg-primary w-36 text-2xl rounded-lg">
-            {user.user_name}
-          </div>
-          <div className="grid grid-cols-2 w-36 gap-x-2">
-            <div
-              className=" text-black py-3 w-full text-center"
-              style={{
-                backgroundImage: `url(${ticketBg})`,
-                backgroundSize: "100% 100%",
-              }}
-            >
-              <div>TICKET</div>
-              <div>{user?.total_token}</div>
+        <div className="w-52 mx-auto">
+          <div className="text-center flex flex-col items-center bg-white p-2 border-8 border-black rounded-tl-2xl rounded-tr-2xl">
+            <div className="mb-2 bg-primary w-36 text-3xl rounded-lg py-3 px-2">
+              {user.user_name}
             </div>
-            <div className="bg-primary text-black py-3 rounded w-full text-center">
-              <div>SCORE</div>
-              <div>{user?.score}</div>
+            <div className="grid grid-cols-2 w-36 gap-x-2">
+              <div
+                className=" text-black py-3 w-full text-center text-2xl"
+                style={{
+                  backgroundImage: `url(${ticketBg})`,
+                  backgroundSize: "100% 100%",
+                }}
+              >
+                <div>TICKET</div>
+                <div>{user?.total_token}</div>
+              </div>
+              <div className="bg-primary text-black py-3 rounded w-full text-center text-2xl">
+                <div>SCORE</div>
+                <div>{user?.score}</div>
+              </div>
             </div>
           </div>
-          <div className="h-20 w-36 bg-primary rounded-bl-full rounded-br-full mt-2 flex justify-center items-center">
-            <Icon icon="icon-park-outline:game-ps" width="32" height="32" />
-          </div>
+          <img src={profileBottom} alt="" />
         </div>
       </div>
-      <div className="p-2  text-center  overflow-hidden mb-10">
-        {isConnect ? (
+      <div className="p-2  text-center  overflow-hidden mb-20">
+        {account.isConnected ? (
           <>
-            {user.wallet_address && (
-              <p className="mb-2 text-gray-200">
-                Wallet Address:
-                {user.wallet_address.substring(0, 4) +
-                  "..." +
-                  user.wallet_address.substring(
-                    account.length - 5,
-                    account.length - 1
-                  )}
-              </p>
-            )}
-
             {loadUser && (
-              <div className="w-40 mx-auto">
+              <div className="w-full mx-auto flex items-center justify-center">
                 {user.sign != null && user.sign.length > 10 ? (
                   <>
-                    <Input
-                      onChange={(e: {
-                        target: { value: SetStateAction<number> };
-                      }) => setTokenCount(e.target.value)}
-                      type="number"
-                      error={undefined}
-                      label="Number of token"
-                      value={tokenCount}
-                      onBlur={undefined}
-                    />
-                    {!loadingBuy ? (
-                      <Button
-                        label="Buy Token"
-                        onClick={BuyToken}
-                        className="mb-5"
-                      />
-                    ) : (
-                      <div className="flex justify-center items-center">
-                        <RotatingLines
-                          visible={true}
-                          height="24"
-                          width="24"
-                          strokeWidth="5"
-                          animationDuration="0.75"
-                          ariaLabel="rotating-lines-loading"
-                          strokeColor="yellow"
-                        />
+                    <div className="flex gap-x-4 mb-6">
+                      <div>
+                        <Label label="Number of Tokens" className="text-2xl" />
+                        <div className="flex bg-white rounded-md">
+                          <div
+                            className="flex justify-center items-center px-2 cursor-pointer"
+                            onClick={() =>
+                              tokenCount > 1 && setTokenCount(tokenCount - 1)
+                            }
+                          >
+                            <Icon
+                              icon="typcn:minus"
+                              className="w-5 h-5 text-primary"
+                            />
+                          </div>
+                          <Input
+                            onChange={(e: {
+                              target: { value: SetStateAction<number> };
+                            }) => setTokenCount(e.target.value)}
+                            type="number"
+                            error={undefined}
+                            label=""
+                            value={tokenCount}
+                            onBlur={undefined}
+                            className="w-20 text-center"
+                          />
+                          <div
+                            className="flex justify-center items-center px-2 cursor-pointer"
+                            onClick={() => setTokenCount(tokenCount + 1)}
+                          >
+                            <Icon
+                              icon="mingcute:plus-fill"
+                              className="w-5 h-5 text-primary"
+                            />
+                          </div>
+                        </div>
                       </div>
-                    )}
+
+                      {!isPending ? (
+                        <Button
+                          label="Buy Tokens"
+                          onClick={BuyToken}
+                          className="items-end !py-0 h-[50px] mt-[31px]"
+                          disabled={isPending}
+                        />
+                      ) : (
+                        <div className="flex justify-center items-center w-20">
+                          <RotatingLines
+                            visible={true}
+                            width="24"
+                            strokeWidth="5"
+                            animationDuration="0.75"
+                            ariaLabel="rotating-lines-loading"
+                            strokeColor="yellow"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </>
                 ) : (
                   <Button label="Sign" onClick={SignWallet} className="mb-5" />
                 )}
               </div>
             )}
-            <div className="mb-10 flex gap-4 justify-center">
-              <Button
-                label="Disconnect Wallet"
-                onClick={DisconnectWallet}
-                className="mb-5"
-              />
-            </div>
           </>
         ) : (
-          <div>
-            <p className="text-white mb-2 uppercase">
-              Please connect wallet to buy tokens.
-            </p>
-            <Button
-              label="Connect Wallet"
-              onClick={ConnectToWallet}
-              className="mb-5"
-            />
-          </div>
+          <p className="text-white mb-2 uppercase">
+            Please connect wallet to buy tokens.
+          </p>
         )}
+        <div className="text-white mb-2 text-2xl">
+          <p>Transaction Status</p>
+          {hash && <div>Transaction Hash: {hash}</div>}
+          {isConfirming && <div>Waiting for confirmation...</div>}
+          {isConfirmed && <div>Transaction confirmed.</div>}
+        </div>
+        <div>
+          <div className="flex justify-center">
+            {/* <ConnectKitButton /> */}
+
+            <ConnectKitButton.Custom>
+              {({
+                isConnected,
+                isConnecting,
+                show,
+                hide,
+                truncatedAddress,
+                ensName,
+                chain,
+              }) => {
+                return (
+                  <Button
+                    onClick={ConnectButtonClick(show, hide)}
+                    label={
+                      isConnected
+                        ? ensName ?? truncatedAddress
+                        : "Connect Wallet"
+                    }
+                  />
+                );
+              }}
+            </ConnectKitButton.Custom>
+          </div>
+        </div>
       </div>
     </Main>
   );

@@ -15,6 +15,7 @@ export const buttonStyle = cva(
           "bg-primary  text-black hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
         ],
         secondary: ["bg-secondary text-black"],
+        dark: ["bg-dark text-white"],
         white_outline: ["text-black border border-black"],
         primary_outline: ["text-primary border border-primary"],
         secondary_outline: ["text-secondary border border-secondary"],

@@ -5,7 +5,7 @@ import Main, { HeadMeta } from "../../components/Layouts/Main/Main";
 import { RotatingLines } from "react-loader-spinner";
 
 export default function Leaderboard() {
-  const headers = ["user_name", "score"];
+  const headers: any = ["user_name", "score"];
   const [data, setData]: any = useState([]);
   const [user, setUser] = useState({});
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -42,7 +42,7 @@ export default function Leaderboard() {
     <Main>
       <HeadMeta title="Leaderboard" />
       <h2 className="text-center my-3 text-white text-2xl uppercase">
-        <span className="text-primary">Nitor</span> Leaderboard
+        <span className="text-primary">Lens TAB</span> Leaderboard
       </h2>
       {isLoadingData ? (
         <div className="flex justify-center items-center h-[200px]">
