@@ -609,60 +609,16 @@ export default function Game() {
         });
     }
   };
-
-  const SignWallet = async () => {
-    const chainId = account.chainId;
-    if (chainId != Number(import.meta.env.VITE_CHAIN_ID)) {
-      switchChain(config, { chainId: Number(import.meta.env.VITE_CHAIN_ID) });
-    }
-
-    if (user.sign != null && user.sign.length > 10) {
-      return;
-    }
-    try {
-      const signature = await signMessage(config, {
-        message: "Hello From Lens Tab!",
-      });
-
-      let postData = { user_id: user.user_id, sign: signature };
-      axios
-        .post(import.meta.env.VITE_API_URL + "/submit_sign", postData)
-        .then((res) => {
-          console.log(res.data[0]);
-          if (!res.data[0].error) {
-            setUser({ ...user, sign: signature });
-            localStorage.setItem(
-              "user",
-              JSON.stringify({ ...user, sign: signature })
-            );
-          } else {
-            Toast("e", res.data[0].message);
-          }
-        })
-        .catch((err) => {
-          console.log("Fetch user Data Error:", err);
-        });
-    } catch (error: any) {
-      console.log("Failed to send transaction:", error);
-      let message = "error on Sign";
-      switch (error.code) {
-        case 4001:
-          message = "Sign canceled by user.";
-          break;
-      }
-      Toast("error", message);
-    }
-  };
-
+  
   const BuyToken = async () => {
     if (tokenCount < 1) {
       Toast("w", "Please enter number more than 0");
       return;
     }
-    if (user.sign == null) {
-      SignWallet();
-      return;
-    }
+    // if (user.sign == null) {
+    //   SignWallet();
+    //   return;
+    // }
     try {
       await switchChain(config, {
         chainId: +import.meta.env.VITE_CHAIN_ID,
