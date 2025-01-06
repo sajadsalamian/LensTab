@@ -315,12 +315,12 @@ export default function Profile() {
     <Main title="Profile">
       <HeadMeta title="Profile" />
       <div className="mb-5 pt-5">
-        <div className="w-52 mx-auto">
+        <div className="w-80 mx-auto">
           <div className="text-center flex flex-col items-center bg-white p-2 border-8 border-black rounded-tl-2xl rounded-tr-2xl">
-            <div className="mb-2 bg-primary w-36 text-3xl rounded-lg py-3 px-2">
+            <div className="mb-2 bg-primary w-48 text-3xl rounded-lg py-3 px-2">
               {user.user_name}
             </div>
-            <div className="grid grid-cols-2 w-36 gap-x-2">
+            <div className="grid grid-cols-2 w-48 gap-x-2">
               <div
                 className=" text-black py-3 w-full text-center text-2xl"
                 style={{
