@@ -1,50 +1,111 @@
-# React + TypeScript + Vite
+## 🚀 LensAI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/BannerLensAI.png?raw=true)
 
-Currently, two official plugins are available:
+LensAI empowers creators to transform ideas into stunning digital art and NFTs with AI-driven tools. Simplify, create, and monetize your art effortlessly in an integrated marketplace.
+🌐 **Live Preview:** [LensAI App
+](https://ailenser.vercel.app/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🌟 Project Name:
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+**LensAI**
 
-- Configure the top-level `parserOptions` property like this:
+---
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+## 🎨 Team Members
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+- **Okur Simsek** (Lens Handle: **[@aidev](https://orb.club/aidev)**) - Co-Founder & Lead Blockchain Developer 🛠  
+- **Yusuf Aksoy** (Lens Handle: **[@Letjoellive](https://orb.club/letjoellive)**) - Co-Founder & Creative Lead (Graphic Design & UI/UX) 🎨  
+- **Navid Dashsooz** (Lens Handle: **[@Nasran8](https://orb.club/nasran8)**) - Founder & CEO 🧠  
+- **Costantino Testa** (Lens Handle: **[@Cyberelitex](https://orb.club/cyberelitex)**) - Co-Founder & CSO 🔍 
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+---
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## ✨ Project Description
+
+LensAI is **where creativity meets blockchain magic**!
+
+Ever dreamed of turning your wild ideas into breathtaking digital art? With **LensAI**, you can:
+
+1. Chat with an AI buddy to craft the perfect creative prompts.
+2. Use those prompts to generate stunning, one-of-a-kind digital artwork.
+3. Mint your masterpieces as NFTs and list them for sale in an integrated marketplace.
+
+LensAI simplifies the journey from idea 💡 to NFT 💎, empowering creators to monetize their art effortlessly.
+
+---
+
+## 🔑 Key Features
+
+- 🤖 **AI-Powered Prompt Generation:** Friendly AI to refine and create custom prompts.
+- 🖼 **AI Image Creation:** Transform prompts into jaw-dropping digital art.
+- 🔗 **NFT Minting:** Seamlessly mint your artwork as NFTs on the blockchain.
+- 🛒 **Marketplace Integration:** Showcase, sell, and trade NFTs in our built-in marketplace.
+- 🛡 **ConnectKit Integration:** Securely connect your wallet for hassle-free transactions.
+
+---
+
+## 🔧 Solidity Implementation
+
+This Solidity implementation demonstrates an NFT factory pattern, enabling:
+
+1. Minting NFTs through individual contracts.
+2. Managing ownership and metadata for each NFT.
+3. Listing NFTs for sale on the blockchain with transparent ownership and pricing.
+
+---
+
+## 🔗 Deployed Contract
+
+- **Proof of Deployment:** [View Contract on Lens Testnet Explorer](https://block-explorer.testnet.lens.dev/address/0x3d8Ad6abf0Cf690bd42BDF38aF28629a323BC809#contract)
+- **Contract Address:** `0x3d8Ad6abf0Cf690bd42BDF38aF28629a323BC809`
+
+---
+
+## ⚡ Network
+
+LensAI is powered by the **Lens Protocol Testnet Network**—fast, cost-efficient, and scalable!
+
+---
+
+## 🧠 Innovative Aspects
+
+- Easy-peasy AI interactions for creative prompt generation.
+- Smooth sailing from idea to NFT minting and selling.
+- Making AI-driven creativity accessible to **everyone**, not just techies.
+
+---
+
+## 🎯 Target Audience
+
+Calling all **digital artists, content creators, and NFT enthusiasts**!
+LensAI is your go-to tool for turning ideas into revenue-generating digital art.
+
+---
+
+## 🌍 Impact
+
+LensAI is on a mission to bridge the gap between creativity and blockchain technology. By lowering barriers, we’re empowering artists while enriching the decentralized digital art ecosystem.
+
+---
+
+## 🔗 Links
+
+- **Source Code:** [GitHub - LensAI](https://github.com/saeidha/LensAI)
+- **Preview:** [LensAI App](https://ailenser.vercel.app/)
+- **Demo Video:** [Video](https://streamable.com/7i9w7f)
+- **Screenshots:** ![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/1.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/2.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/3.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/4.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/5.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/6.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/7.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/8.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/9.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/10.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/11.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/12.png?raw=true)
+![alt text](https://github.com/saeidha/LensAI/blob/main/image/README/13.png?raw=true)
