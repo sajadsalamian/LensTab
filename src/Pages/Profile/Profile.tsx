@@ -10,7 +10,6 @@ import profileBottom from "../../assets/images/profile-bottom.png";
 import { ConnectKitButton } from "connectkit";
 import {
   useAccount,
-  useSendTransaction,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
@@ -38,6 +37,7 @@ export default function Profile() {
   const [loadUser, setLoadUser] = useState(false);
 
   const [tokenCount, setTokenCount] = useState(1);
+  const [txHash, setTxHash] = useState("");
 
   useEffect(() => {
     FetchUser();
@@ -46,7 +46,7 @@ export default function Profile() {
   useEffect(() => {
     if (user.user_id != null) {
       setLoadUser(true);
-      console.log(user);
+      // console.log(user);
       if (account.status === "connected") {
         ConnectWallet();
       }
@@ -89,7 +89,7 @@ export default function Profile() {
       loadUser &&
       (user.wallet_address == null || user.wallet_address.length < 5)
     ) {
-      console.log("connect wallet");
+      // console.log("connect wallet");
       let postData = { user_id: user.user_id, wallet_address: account.address };
       axios
         .post(import.meta.env.VITE_API_URL + "/submit_wallet", postData)
@@ -109,14 +109,13 @@ export default function Profile() {
           console.log("Fetch user Data Error:", err);
         });
     } else {
-      console.log("not new connect wallet");
+      // console.log("not new connect wallet");
     }
   };
 
   const SignWallet = async () => {
     const chainId = account.chainId;
     if (chainId != Number(import.meta.env.VITE_CHAIN_ID)) {
-      console.log("switchChain start");
       switchChain(config, { chainId: Number(import.meta.env.VITE_CHAIN_ID) });
     }
 
@@ -127,7 +126,6 @@ export default function Profile() {
       const signature = await signMessage(config, {
         message: "Hello From Lens Tab!",
       });
-      console.log("sign result", signature);
 
       let postData = { user_id: user.user_id, sign: signature };
       axios
@@ -207,6 +205,14 @@ export default function Profile() {
     }
   };
 
+  useEffect(() => {
+    console.log("isConfirmed", isConfirmed);
+    if (isConfirmed) {
+      AddTokensToPRofile();
+    }
+    return () => {};
+  }, [isConfirmed]);
+
   const BuyToken = async () => {
     if (tokenCount < 1) {
       Toast("w", "Please enter number more than 0");
@@ -217,10 +223,10 @@ export default function Profile() {
       return;
     }
     try {
-      const chainChange = await switchChain(config, {
-        chainId: zksyncSepoliaTestnet.id,
+      await switchChain(config, {
+        // chainId: zksyncSepoliaTestnet.id,
+        chainId: +import.meta.env.VITE_CHAIN_ID,
       });
-      console.log("chainChange", chainChange);
 
       const abi = [
         {
@@ -255,36 +261,16 @@ export default function Profile() {
       // adccount 2 : 0xaa8A194030c92f3cBbbB9A13C7ca1466ED0b573D
 
       const txHash = await writeContractAsync({
-        address: "0x67A4058Bf46d5b51232ff5aa45dc93Ea6445a51E",
+        address: "0x7D2E00dDFA500a2A4b4DD5f75cC65B2ff7D29255", //lenz
+        // address: "0x67A4058Bf46d5b51232ff5aa45dc93Ea6445a51E", //zksync
         abi,
-        chainId: zksyncSepoliaTestnet.id,
+        chainId: +import.meta.env.VITE_CHAIN_ID,
+        // chainId: zksyncSepoliaTestnet.id,
         functionName: "buyGameToken",
         value: parseEther("" + tokenCount * 0.0001),
       });
-
-      console.log("send result", txHash);
-
-      Toast("s", "Token Added.");
-      // let postData = {
-      //   user_id: user.user_id,
-      //   token_amount: Number(tokenCount),
-      //   // hash: txHash,
-      // };
-      // axios
-      //   .post(import.meta.env.VITE_API_URL + "/buy_token", postData)
-      //   .then((res) => {
-      //     console.log(res.data[0]);
-      //     if (!res.data[0].error) {
-      //     } else {
-      //       Toast("e", res.data[0].message);
-      //     }
-      //   })
-      //   .catch((err) => {
-      //     console.log("Fetch user Data Error:", err);
-      //   });
-      // setLoadingBuy(false);
-      // Toast("success", "Tokens Added to Your Profile.");
-      // FetchUser();
+      console.log("txhash result", txHash);
+      setTxHash(txHash);
     } catch (error: any) {
       console.log("Failed to send transaction:", error.message);
       console.log(error.message.split(".")[0]);
@@ -298,7 +284,29 @@ export default function Profile() {
     }
   };
 
-  const ConnectButtonClick = (show, hide) => {
+  const AddTokensToPRofile = () => {
+    let postData = {
+      user_id: user.user_id,
+      token_amount: Number(tokenCount),
+      hash: txHash,
+    };
+    axios
+      .post(import.meta.env.VITE_API_URL + "/buy_token", postData)
+      .then((res) => {
+        // console.log(res.data[0]);
+        if (!res.data[0].error) {
+        } else {
+          Toast("e", res.data[0].message);
+        }
+      })
+      .catch((err) => {
+        console.log("Fetch user Data Error:", err);
+      });
+    Toast("success", "Ticket Added to Your Profile.");
+    FetchUser();
+  };
+
+  const ConnectButtonClick = (show: any) => {
     return () => {
       show();
     };
@@ -378,7 +386,7 @@ export default function Profile() {
                         </div>
                       </div>
 
-                      {!isPending ? (
+                      {!isPending && !isConfirming ? (
                         <Button
                           label="Buy Tokens"
                           onClick={BuyToken}
@@ -393,7 +401,7 @@ export default function Profile() {
                             strokeWidth="5"
                             animationDuration="0.75"
                             ariaLabel="rotating-lines-loading"
-                            strokeColor="yellow"
+                            strokeColor="green"
                           />
                         </div>
                       )}
@@ -410,29 +418,19 @@ export default function Profile() {
             Please connect wallet to buy tokens.
           </p>
         )}
-        <div className="text-white mb-2 text-2xl">
+        {/* <div className="text-white mb-2 text-2xl">
           <p>Transaction Status</p>
           {hash && <div>Transaction Hash: {hash}</div>}
           {isConfirming && <div>Waiting for confirmation...</div>}
           {isConfirmed && <div>Transaction confirmed.</div>}
-        </div>
+        </div> */}
         <div>
           <div className="flex justify-center">
-            <ConnectKitButton />
-
-            {/* <ConnectKitButton.Custom>
-              {({
-                isConnected,
-                isConnecting,
-                show,
-                hide,
-                truncatedAddress,
-                ensName,
-                chain,
-              }) => {
+            <ConnectKitButton.Custom>
+              {({ isConnected, show, truncatedAddress, ensName }) => {
                 return (
                   <Button
-                    onClick={ConnectButtonClick(show, hide)}
+                    onClick={ConnectButtonClick(show)}
                     label={
                       isConnected
                         ? ensName ?? truncatedAddress
@@ -441,7 +439,7 @@ export default function Profile() {
                   />
                 );
               }}
-            </ConnectKitButton.Custom> */}
+            </ConnectKitButton.Custom>
           </div>
         </div>
       </div>

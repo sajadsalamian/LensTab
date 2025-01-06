@@ -9,6 +9,14 @@ import gameBack from "../../assets/images/game_back.png";
 import Input from "../../components/Elements/Input";
 import splash from "../../assets/images/splash.png";
 import ticketBg from "../../assets/images/ticket.png";
+import {
+  useAccount,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
+import { config } from "../../main";
+import { signMessage, switchChain } from "@wagmi/core";
+import { parseEther } from "viem";
 
 export default function Game() {
   const [user, setUser]: any = useState(null);
@@ -20,8 +28,18 @@ export default function Game() {
   const [showMenu, setShowMenu] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
-  const [tokenCount, setTokenCount] = useState(0);
-  const [loadingBuy, setLoadingBuy] = useState(false); // duplicate variable
+
+  const account = useAccount();
+  const {
+    data: hash,
+    error,
+    isPending,
+    writeContractAsync,
+  } = useWriteContract({ config });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({ hash });
+  const [tokenCount, setTokenCount] = useState(1);
+  const [txHash, setTxHash] = useState("");
 
   useEffect(() => {
     let userInfo1 = JSON.parse(localStorage.getItem("user")!);
@@ -592,57 +610,30 @@ export default function Game() {
     }
   };
 
-  // const { ethereum } = new WalletTgSdk({
-  //   injected: true, // default: false
-  // });
+  const SignWallet = async () => {
+    const chainId = account.chainId;
+    if (chainId != Number(import.meta.env.VITE_CHAIN_ID)) {
+      switchChain(config, { chainId: Number(import.meta.env.VITE_CHAIN_ID) });
+    }
 
-  const BuyToken = async () => {
-    if (tokenCount < 1) {
-      Toast("w", "Please enter number more than 0");
+    if (user.sign != null && user.sign.length > 10) {
       return;
     }
     try {
-      // await ethereum.request({
-      //   method: "wallet_switchEthereumChain",
-      //   params: [{ chainId: "0xcc" }],
-      // });
+      const signature = await signMessage(config, {
+        message: "Hello From Lens Tab!",
+      });
 
-      // const accounts = await ethereum.request({ method: "eth_accounts" });
-      const transactionParameters = {
-        to: "0xaddbc186a3902392aa6c19908197ba80f654adf9",
-        // from: accounts[0],
-        value: tokenCount * (0.001 * 10 ** 18),
-        chainId: "0xcc",
-      };
-
-      setLoadingBuy(true);
-      // const txHash = await ethereum.request({
-      //   method: "eth_sendTransaction",
-      //   params: [transactionParameters],
-      // });
-      // console.log("Transaction sent:", txHash);
-
-      let postData = {
-        user_id: user.user_id,
-        token_amount: Number(tokenCount),
-        // hash: txHash,
-      };
+      let postData = { user_id: user.user_id, sign: signature };
       axios
-        .post(import.meta.env.VITE_API_URL + "/buy_token", postData)
+        .post(import.meta.env.VITE_API_URL + "/submit_sign", postData)
         .then((res) => {
           console.log(res.data[0]);
           if (!res.data[0].error) {
-            Toast("s", "Wallet Address Update Successfully.");
-            setUser({
-              ...user,
-              total_token: user.total_token + tokenCount,
-            });
+            setUser({ ...user, sign: signature });
             localStorage.setItem(
               "user",
-              JSON.stringify({
-                ...user,
-                total_token: Number(user.total_token) + Number(tokenCount),
-              })
+              JSON.stringify({ ...user, sign: signature })
             );
           } else {
             Toast("e", res.data[0].message);
@@ -651,22 +642,131 @@ export default function Game() {
         .catch((err) => {
           console.log("Fetch user Data Error:", err);
         });
-      setLoadingBuy(false);
-      Toast("success", "You Charge Successfully");
-
-      user.total_token = +user.total_token + +tokenCount;
-      localStorage.setItem("user", JSON.stringify(user));
     } catch (error: any) {
       console.log("Failed to send transaction:", error);
-      let message = "error on transaction";
+      let message = "error on Sign";
       switch (error.code) {
         case 4001:
-          message = "Transaction canceled by user.";
+          message = "Sign canceled by user.";
           break;
       }
-      setLoadingBuy(false);
       Toast("error", message);
     }
+  };
+
+  const BuyToken = async () => {
+    if (tokenCount < 1) {
+      Toast("w", "Please enter number more than 0");
+      return;
+    }
+    if (user.sign == null) {
+      SignWallet();
+      return;
+    }
+    try {
+      await switchChain(config, {
+        chainId: +import.meta.env.VITE_CHAIN_ID,
+      });
+
+      const abi = [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "buyGameToken",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "deployer",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ];
+
+      const txHash = await writeContractAsync({
+        address: "0x7D2E00dDFA500a2A4b4DD5f75cC65B2ff7D29255", //lenz
+        abi,
+        chainId: +import.meta.env.VITE_CHAIN_ID,
+        functionName: "buyGameToken",
+        value: parseEther("" + tokenCount * 0.0001),
+      });
+      console.log("txhash result", txHash);
+      setTxHash(txHash);
+    } catch (error: any) {
+      console.log("Failed to send transaction:", error.message);
+      console.log(error.message.split(".")[0]);
+      let message = "error on transaction";
+      switch (error.message.split(".")[0]) {
+        case "User rejected the request":
+          message = "Transaction canceled.";
+          break;
+      }
+      Toast("error", message);
+    }
+  };
+
+  useEffect(() => {
+    console.log("isConfirmed", isConfirmed);
+    if (isConfirmed) {
+      AddTokensToPRofile();
+    }
+    return () => {};
+  }, [isConfirmed]);
+
+  const AddTokensToPRofile = () => {
+    let postData = {
+      user_id: user.user_id,
+      token_amount: Number(tokenCount),
+      hash: txHash,
+    };
+    axios
+      .post(import.meta.env.VITE_API_URL + "/buy_token", postData)
+      .then((res) => {
+        Toast("success", "Ticket Added to Your Profile.");
+        if (!res.data[0].error) {
+        } else {
+          Toast("e", res.data[0].message);
+        }
+      })
+      .catch((err) => {
+        console.log("Fetch user Data Error:", err);
+      });
+    FetchUser();
+  };
+
+  const FetchUser = () => {
+    let userInfo1 = JSON.parse(localStorage.getItem("user"));
+    let postData = {
+      user_id: "" + userInfo1.user_id,
+      user_name: userInfo1.user_name,
+    };
+    axios({
+      method: "post",
+      url: import.meta.env.VITE_API_URL + "/user",
+      data: postData,
+    })
+      .then((res) => {
+        setUser(res.data);
+        localStorage.setItem("user", JSON.stringify(res.data));
+      })
+      .catch((err) => {
+        if (err.response) {
+          console.log("Fetch user Data Error Response:", err.response);
+        }
+      });
   };
 
   return (
@@ -703,7 +803,7 @@ export default function Game() {
               </div>
             </div>
             <div className="fixed left-4 right-4 bottom-24 flex justify-center items-center">
-              {!loadingGame ? (
+              {!loadingGame && !isConfirming ? (
                 <div className="flex gap-2 w-full">
                   <Button
                     label="Start Game"
@@ -770,12 +870,14 @@ export default function Game() {
                 onChange={(e: { target: { value: SetStateAction<number> } }) =>
                   setTokenCount(e.target.value)
                 }
+                type="number"
                 error={undefined}
                 label="Number of token"
                 value={tokenCount}
                 onBlur={undefined}
+                className="mb-4"
               />
-              {!loadingBuy ? (
+              {!isPending && !isConfirming ? (
                 <Button label="Buy Token" onClick={BuyToken} className="mb-5" />
               ) : (
                 <div className="flex justify-center items-center">
@@ -785,7 +887,7 @@ export default function Game() {
                     strokeWidth="5"
                     animationDuration="0.75"
                     ariaLabel="rotating-lines-loading"
-                    strokeColor="yellow"
+                    strokeColor="green"
                   />
                 </div>
               )}
