@@ -10,7 +10,6 @@ import Intro from "./Pages/Intro/Intro.tsx";
 import { WagmiProvider, createConfig } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
-import { sepolia, zksyncSepoliaTestnet } from "wagmi/chains";
 import { type Chain } from "viem";
 
 export const LensTestnet: Chain = {
@@ -35,7 +34,7 @@ export const LensTestnet: Chain = {
 
 export const config = createConfig(
   getDefaultConfig({
-    chains: [sepolia, LensTestnet, zksyncSepoliaTestnet],
+    chains: [LensTestnet],
     walletConnectProjectId: import.meta.env.VITE_PROJECT_ID,
     appName: "Lens Tap",
     // Optional App Info
