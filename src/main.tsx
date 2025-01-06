@@ -9,8 +9,14 @@ import Profile from "./Pages/Profile/Profile.tsx";
 import Intro from "./Pages/Intro/Intro.tsx";
 import { WagmiProvider, createConfig } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ConnectKitProvider, getDefaultConfig } from "connectkit";
-import { type Chain } from "viem";
+import {
+  ConnectKitProvider,
+  getDefaultConfig,
+  SIWEConfig,
+  SIWEProvider,
+  SIWESession,
+} from "connectkit";
+import { Address, type Chain } from "viem";
 
 export const LensTestnet: Chain = {
   id: 37111,

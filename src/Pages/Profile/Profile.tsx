@@ -19,6 +19,7 @@ import { zksyncSepoliaTestnet } from "wagmi/chains";
 import { parseEther } from "viem";
 import Label from "../../components/Elements/Label";
 import { Icon } from "@iconify/react/dist/iconify.js";
+import MyConnectButton from "../../components/Elements/MyConnectButton";
 
 export default function Profile() {
   const account = useAccount();
@@ -315,7 +316,7 @@ export default function Profile() {
     <Main title="Profile">
       <HeadMeta title="Profile" />
       <div className="mb-5 pt-5">
-        <div className="w-80 mx-auto">
+        <div className="w-64 mx-auto">
           <div className="text-center flex flex-col items-center bg-white p-2 border-8 border-black rounded-tl-2xl rounded-tr-2xl">
             <div className="mb-2 bg-primary w-48 text-3xl rounded-lg py-3 px-2">
               {user.user_name}
@@ -411,12 +412,6 @@ export default function Profile() {
             Please connect wallet to buy tokens.
           </p>
         )}
-        {/* <div className="text-white mb-2 text-2xl">
-          <p>Transaction Status</p>
-          {hash && <div>Transaction Hash: {hash}</div>}
-          {isConfirming && <div>Waiting for confirmation...</div>}
-          {isConfirmed && <div>Transaction confirmed.</div>}
-        </div> */}
         <div>
           <div className="flex justify-center">
             <ConnectKitButton.Custom>
