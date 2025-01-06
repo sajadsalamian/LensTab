@@ -345,70 +345,64 @@ export default function Profile() {
           <>
             {loadUser && (
               <div className="w-full mx-auto flex items-center justify-center">
-                {user.sign != null && user.sign.length > 10 ? (
-                  <>
-                    <div className="flex gap-x-4 mb-6">
-                      <div>
-                        <Label label="Number of Tokens" className="text-2xl" />
-                        <div className="flex bg-white rounded-md">
-                          <div
-                            className="flex justify-center items-center px-2 cursor-pointer"
-                            onClick={() =>
-                              tokenCount > 1 && setTokenCount(tokenCount - 1)
-                            }
-                          >
-                            <Icon
-                              icon="typcn:minus"
-                              className="w-5 h-5 text-primary"
-                            />
-                          </div>
-                          <Input
-                            onChange={(e: {
-                              target: { value: SetStateAction<number> };
-                            }) => setTokenCount(e.target.value)}
-                            type="number"
-                            error={undefined}
-                            label=""
-                            value={tokenCount}
-                            onBlur={undefined}
-                            className="w-20 text-center"
-                          />
-                          <div
-                            className="flex justify-center items-center px-2 cursor-pointer"
-                            onClick={() => setTokenCount(tokenCount + 1)}
-                          >
-                            <Icon
-                              icon="mingcute:plus-fill"
-                              className="w-5 h-5 text-primary"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {!isPending && !isConfirming ? (
-                        <Button
-                          label="Buy Tokens"
-                          onClick={BuyToken}
-                          className="items-end !py-0 h-[50px] mt-[31px]"
-                          disabled={isPending}
+                <div className="flex gap-x-4 mb-6">
+                  <div>
+                    <Label label="Number of Tokens" className="text-2xl" />
+                    <div className="flex bg-white rounded-md">
+                      <div
+                        className="flex justify-center items-center px-2 cursor-pointer"
+                        onClick={() =>
+                          tokenCount > 1 && setTokenCount(tokenCount - 1)
+                        }
+                      >
+                        <Icon
+                          icon="typcn:minus"
+                          className="w-5 h-5 text-primary"
                         />
-                      ) : (
-                        <div className="flex justify-center items-center w-20">
-                          <RotatingLines
-                            visible={true}
-                            width="24"
-                            strokeWidth="5"
-                            animationDuration="0.75"
-                            ariaLabel="rotating-lines-loading"
-                            strokeColor="green"
-                          />
-                        </div>
-                      )}
+                      </div>
+                      <Input
+                        onChange={(e: {
+                          target: { value: SetStateAction<number> };
+                        }) => setTokenCount(e.target.value)}
+                        type="number"
+                        error={undefined}
+                        label=""
+                        value={tokenCount}
+                        onBlur={undefined}
+                        className="w-20 text-center"
+                      />
+                      <div
+                        className="flex justify-center items-center px-2 cursor-pointer"
+                        onClick={() => setTokenCount(tokenCount + 1)}
+                      >
+                        <Icon
+                          icon="mingcute:plus-fill"
+                          className="w-5 h-5 text-primary"
+                        />
+                      </div>
                     </div>
-                  </>
-                ) : (
-                  <Button label="Sign" onClick={SignWallet} className="mb-5" />
-                )}
+                  </div>
+
+                  {!isPending && !isConfirming ? (
+                    <Button
+                      label="Buy Tokens"
+                      onClick={BuyToken}
+                      className="items-end !py-0 h-[50px] mt-[31px]"
+                      disabled={isPending}
+                    />
+                  ) : (
+                    <div className="flex justify-center items-center w-20">
+                      <RotatingLines
+                        visible={true}
+                        width="24"
+                        strokeWidth="5"
+                        animationDuration="0.75"
+                        ariaLabel="rotating-lines-loading"
+                        strokeColor="green"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </>
