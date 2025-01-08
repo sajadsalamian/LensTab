@@ -29,16 +29,6 @@ Just play and fun!
 
 ---
 
-## 🔧 Solidity Implementation
-
-This Solidity implementation demonstrates an NFT factory pattern, enabling:
-
-1. Minting NFTs through individual contracts.
-2. Managing ownership and metadata for each NFT.
-3. Listing NFTs for sale on the blockchain with transparent ownership and pricing.
-
----
-
 ## 🔗 Deployed Contract
 
 - **Proof of Deployment:** [View Contract on Lens Testnet Explorer](https://block-explorer.testnet.lens.dev/address/0x7D2E00dDFA500a2A4b4DD5f75cC65B2ff7D29255#contract)
@@ -56,6 +46,7 @@ We use **Lens Protocol Testnet Network** for buy more tickets with Family Connec
 
 We try to interact everyone with this game for challenge their skill of how can score more.
 
+---
 
 ## 🔗 Links
 
